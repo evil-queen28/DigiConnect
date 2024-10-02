@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables file
+.env
+
+# Node.js dependencies
+node_modules/
+
+# Python virtual environments
+venv/
+env/
+.venv/
+
+# Logs
+*.log
+
+# SQLite database (if any)
+*.sqlite3
+
+# Flask cache and session data
+instance/
+*.pyc
+
+# Docker files
+docker-compose.override.yml
+*.dockerfile
+Dockerfile
+
+# IDE specific files (optional)
+.vscode/
+.idea/
+
+# MacOS system files
+.DS_Store
+
+# Git specific files
+.git/

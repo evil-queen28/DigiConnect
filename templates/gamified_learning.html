@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPI Quest - Gamified Learning</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <style>
+        /* Styles from main_page.html */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            min-width: 160px;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .dropdown-content a, .dropdown-content button {
+            color: #333;
+            padding: 2px 2px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .dropdown-content a:hover, .dropdown-content button:hover {
+            background-color: #f1f1f1;
+            color: #007bff;
+        }
+
+        .user-profile:hover .dropdown-content {
+            display: block;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #logout-btn {
+            color: white;
+            background-color: blue;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        #logout-btn:hover {
+            background-color: #f1f1f1;
+            color: #0056b3;
+        }
+
+        /* Styles from gamified_learning.html */
+        .quest-item {
+            transition: transform 0.3s ease-in-out;
+        }
+        .quest-item:hover {
+            transform: scale(1.05);
+        }
+        #chatbot-popup {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 500px;
+            height: 600px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        /* Close button inside chatbot popup */
+        #close-chatbot {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .chatbot-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .chatbot-icon:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <header>
+        
+        <div class="container">
+            <img src="static/images/image.png" alt="Digital India Logo" class="logo">
+            <h1>Digital India DPI- Quest</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/dashboard">Dashboard</a></li>
+                   
+                <li>
+            {% if user %}
+            <div class="user-profile">
+                <div class="user-info">
+                    <img src="{{ profile_picture_url }}" alt="User Profile Picture" class="profile-pic" id="profile-pic">
+                    <span>{{ user.username }}</span>
+                </div>
+                <div class="dropdown-content" id="dropdown">
+                    <a href="{{ url_for('profile') }}">Edit Profile</a>
+                    <button id="logout-btn" class="button">Logout</button>
+                </div>
+            {% else %}
+            <button id="signup-btn" class="button">Sign Up</button>
+            <button id="signin-btn" class="button">Sign In</button>
+            {% endif %}</li>
+        </div> </ul>
+    </nav>
+    </header>
+
+    <main class="container mx-auto mt-8 px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2">
+                <section id="current-quest" class="bg-white rounded-lg shadow-md p-6 mb-8 transition-all duration-300 ease-in-out">
+                    <h2 class="text-2xl font-bold mb-4 cursor-pointer" onclick="toggleSection('current-quest-content')">
+                        Current Quest <i class="fas fa-chevron-down ml-2"></i>
+                    </h2>
+                    <div id="current-quest-content" class="collapsible-content">
+                        <div id="quest-content" class="mb-4"></div>
+                        <div id="quest-options" class="space-y-4"></div>
+                        <button id="submit-answer" class="mt-4 bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition duration-300 hidden focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Submit Answer</button>
+                    </div>
+                </section>
+
+                <section id="quest-map" class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4 cursor-pointer" onclick="toggleSection('map-content')">
+                        Quest Map <i class="fas fa-chevron-down ml-2"></i>
+                    </h2>
+                    <div id="map-content" class="collapsible-content grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                </section>
+            </div>
+
+            <div>
+                <section id="user-profile" class="bg-white rounded-lg shadow-md p-6 mb-8 sticky top-20">
+                    <h2 class="text-2xl font-bold mb-4">Your Profile</h2>
+                    <div id="profile-content"></div>
+                </section>
+
+                <section id="leaderboard" class="bg-white rounded-lg shadow-md p-6 sticky top-96">
+                    <h2 class="text-2xl font-bold mb-4">Leaderboard</h2>
+                    <div id="leaderboard-content"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Digital India. All rights reserved.</p>
+        </div>
+    </footer>
+      <!-- Chatbot popup -->
+    <div id="chatbot-popup">
+        <button id="close-chatbot">&times;</button>
+        <iframe src="/chatbot" width="100%" height="100%" frameborder="0"></iframe>
+    </div>
+
+    <!-- Chatbot icon/button -->
+    <div class="chatbot-icon" id="chatbot-icon">
+        <img src="static/images/ai-chatbot-icon.svg" alt="AI Chatbot">
+    </div>
+
+    <script>
+        // Toggle chatbot popup and icon
+        const chatbotIcon = document.getElementById('chatbot-icon');
+        const chatbotPopup = document.getElementById('chatbot-popup');
+        const closeChatbot = document.getElementById('close-chatbot');
+        let isOpen = false;
+
+        chatbotIcon.addEventListener('click', function() {
+            if (!isOpen) {
+                chatbotPopup.style.display = 'block';
+                chatbotIcon.innerHTML = '&times;'; // Change to cross mark
+                isOpen = true;
+            } else {
+                chatbotPopup.style.display = 'none';
+                chatbotIcon.innerHTML = '<img src="static/images/ai-chatbot-icon.svg" alt="AI Chatbot">';
+                isOpen = false;
+            }
+        });
+
+        closeChatbot.addEventListener('click', function() {
+            chatbotPopup.style.display = 'none';
+            chatbotIcon.innerHTML = '<img src="static/images/ai-chatbot-icon.svg" alt="AI Chatbot">';
+            isOpen = false;
+        });
+    </script>
+    <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg hidden"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/gamified_learning.js"></script>
+</body>
+</html>

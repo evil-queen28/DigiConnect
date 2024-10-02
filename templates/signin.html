@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPI - Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+        .signin-options {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .signin-option {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            color: #5f6368;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .signin-option.active {
+            color: #1a73e8;
+            border-bottom: 2px solid #1a73e8;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #5f6368;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        input:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #165ec5;
+        }
+        .links {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+        .forgot-password {
+            display: block;
+            margin-bottom: 1rem;
+            color: #1a73e8;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+        .forgot-password:hover {
+            color: #165ec5;
+            text-decoration: underline;
+        }
+        .signup {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            
+            color: #1a73e8;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+        
+        a {
+            color: #1a73e8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #165ec5;
+            text-decoration: underline;
+        }
+        .g-recaptcha {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sign In to your account</h1>
+        <div class="signin-options">
+            <div class="signin-option active" data-option="mobile">Mobile</div>
+            <div class="signin-option" data-option="username">Username</div>
+            <div class="signin-option" data-option="email">Email</div>
+        </div>
+        <form id="signin-form" method="POST">
+            <div class="form-group" id="mobile-input">
+                <label for="mobile">Mobile Number</label>
+                <input type="tel" id="mobile" name="mobile" placeholder="Enter your mobile number">
+            </div>
+            <div class="form-group" id="username-input" style="display: none;">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username">
+            </div>
+            <div class="form-group" id="email-input" style="display: none;">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter your password">
+            </div>
+            <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+            <button type="submit">Sign In</button>
+        </form>
+        <div class="links">
+            <a href="{{ url_for('reset_password') }}" class="forgot-password">Forgot Password?</a>
+            <p>Don't have an account?<a href="{{ url_for('signup') }}" class="signup">SignUp </a></p>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('signin-form');
+        const signinOptions = document.querySelectorAll('.signin-option');
+        const inputs = {
+            mobile: document.getElementById('mobile-input'),
+            username: document.getElementById('username-input'),
+            email: document.getElementById('email-input')
+        };
+
+        signinOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const selectedOption = this.getAttribute('data-option');
+                signinOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+
+                Object.keys(inputs).forEach(key => {
+                    const input = inputs[key].querySelector('input');
+                    if (key === selectedOption) {
+                        inputs[key].style.display = 'block';
+                        input.setAttribute('required', '');
+                    } else {
+                        inputs[key].style.display = 'none';
+                        input.removeAttribute('required');
+                    }
+                });
+            });
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (form.checkValidity()) {
+                form.submit();
+            } else {
+                // Trigger browser's default validation UI
+                form.reportValidity();
+            }
+        });
+    });
+    </script>
+</body>
+</html>
